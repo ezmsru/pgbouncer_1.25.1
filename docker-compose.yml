@@ -1,0 +1,47 @@
+---
+
+services:
+  postgres:
+    image: postgres:13-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "VnLT23rlK3SSinw"
+      POSTGRES_DB: "postgres"
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - postgres-llmgpu-dev_default
+
+  pgbouncer:
+    image: pgbouncer:1.25.1
+    container_name: pgbouncer
+    environment:
+      POSTGRESQL_HOST: "postgres"
+      POSTGRESQL_PORT: "5432"
+      POSTGRESQL_USERNAME: "pgbouncer"
+      POSTGRESQL_PASSWORD: "test"
+      PGBOUNCER_CONF_FILE: "/etc/pgbouncer/pgbouncer.ini"
+      PGBOUNCER_USERLIST_FILE: "/etc/pgbouncer/userlist.txt"
+    ports:
+      - "6432:6432"
+    secrets:
+      - source: pgbouncerini
+        target: /etc/pgbouncer/pgbouncer.ini
+      - source: userlist
+        target: /etc/pgbouncer/userlist.txt
+    networks:
+      - postgres-llmgpu-dev_default
+
+networks:
+  postgres-llmgpu-dev_default:
+
+secrets:
+  pgbouncerini:
+    name: pgbouncerini
+    file: pgbouncer.ini
+  userlist:
+    name: userlist
+    file: userlist.txt
